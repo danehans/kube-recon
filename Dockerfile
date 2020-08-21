@@ -11,4 +11,5 @@ WORKDIR /
 RUN curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.11.0/bin/linux/amd64/kubectl && chmod +x kubectl
 COPY --from=0 /go/src/github.com/octarinesec/kube-recon/main /kube-recon
 COPY http-swagger.nse .
+COPY ssl-enum-ciphers.nse .
 ENTRYPOINT ["/bin/sh"]

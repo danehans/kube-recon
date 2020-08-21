@@ -80,21 +80,38 @@ func (k *KubeRecon) test_rbac() {
 	}
 }
 
-func (k *KubeRecon) nmap() {
+func (k *KubeRecon) nmap(ip string) {
 	log.Print("Running Nmap on the discovered IPs")
-	k.get_ip_addr()
-	for ip := range k.ip_addresses {
+	if len(ip) == 0 {
+		k.get_ip_addr()
+		for i := range k.ip_addresses {
+			output := exec_command_wrapper("nmap",
+				"-p", "[1-65535]",
+				"--script", "http-swagger.nse",
+				"--script", "ssl-enum-ciphers.nse",
+				"--script", "cassandra-brute",
+				"--script", "http-brute",
+				"--script", "http-proxy-brute",
+				"--script", "ms-sql-brute",
+				"--script", "mysql-brute",
+				"--script", "pgsql-brute",
+				"--script", "mongodb-brute",
+				i)
+			log.Printf(output)
+		}
+	} else {
 		output := exec_command_wrapper("nmap",
-									  "-p", "[1-65535]",
-										   "--script", "http-swagger.nse",
-										   "--script", "cassandra-brute",
-										   "--script", "http-brute",
-										   "--script", "http-proxy-brute",
-										   "--script", "ms-sql-brute",
-										   "--script", "mysql-brute",
-										   "--script", "pgsql-brute",
-										   "--script", "mongodb-brute",
-										   ip)
+			"-p", "[1-65535]",
+			"--script", "http-swagger.nse",
+			"--script", "ssl-enum-ciphers.nse",
+			"--script", "cassandra-brute",
+			"--script", "http-brute",
+			"--script", "http-proxy-brute",
+			"--script", "ms-sql-brute",
+			"--script", "mysql-brute",
+			"--script", "pgsql-brute",
+			"--script", "mongodb-brute",
+			ip)
 		log.Printf(output)
 	}
 }
@@ -117,6 +134,7 @@ func (k *KubeRecon) run() {
 	skip_rbac := flag.Bool("skip-rbac", false, "Skip RBAC test")
 	skip_nmap := flag.Bool("skip-nmap", false, "Skip NMAP scan")
 	skip_eicar := flag.Bool("skip-eicar", false, "Skip EICAR test")
+	use_ip := flag.String("use-ip", "", "Specify an IP address to scan")
 
 	flag.Parse()
 	// check_root()
@@ -126,7 +144,11 @@ func (k *KubeRecon) run() {
 	}
 
 	if !*skip_nmap {
-		k.nmap()
+		if use_ip != nil {
+			k.nmap(*use_ip)
+		} else {
+			k.nmap("")
+		}
 	}
 
 	if !*skip_eicar {

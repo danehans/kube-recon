@@ -13,7 +13,7 @@ the prerequisite and run the tool directly on an already running pod. The recomm
 ## Kubernetes
 
 ```bash
-kubectl run kuberecon1 --tty -i --image octarinesec/kube-recon:v11
+kubectl run kuberecon1 --tty -i --image danehans/kube-recon:latest
 ./kube_recon # (This is inside the docker)
 ./kube_recon -help
 ./kube_recon -skip-nmap (full nmap might take alot of time)
